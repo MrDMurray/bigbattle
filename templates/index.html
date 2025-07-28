@@ -9,7 +9,11 @@
 <body>
   <div class="container">
     <h1>Mass Battle Dashboard</h1>
-    <a id="add-group-btn" href="{{ url_for('add_group_page') }}">+ Add NPC Group</a>
+    <nav class="top-nav">
+      <a id="add-group-btn" href="{{ url_for('add_group_page') }}">+ Add NPC Group</a>
+      <a href="#" class="nav-link">Player View</a>
+      <a href="#" class="nav-link">Settings</a>
+    </nav>
     <div id="groups">
       {% for g in groups %}
       <div class="group" id="group-{{ g.id }}">
