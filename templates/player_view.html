@@ -11,17 +11,22 @@
     <h1>Player View</h1>
     <nav class="top-nav">
       <a href="{{ url_for('index') }}" class="nav-link">DM View</a>
+      <a href="{{ url_for('settings_page') }}" class="nav-link">Settings</a>
     </nav>
     <div id="groups">
       {% for g in groups %}
       <div class="group" id="group-{{ g.id }}">
         <div class="grid">
-          {% for _ in range(g.count) %}
-          <div class="cell">
-            <img src="{{ url_for('static', filename='icons/' + (g.icon if g.icon else 'default_icon.png')) }}"
-                 onerror="this.onerror=null;this.src='{{ url_for('static', filename='icons/default_icon.png') }}';" />
-          </div>
-          {% endfor %}
+      {% for npc in g.npcs %}
+      <div class="cell">
+        <img src="{{ url_for('static', filename='icons/' + (g.icon if g.icon else 'default_icon.png')) }}"
+             onerror="this.onerror=null;this.src='{{ url_for('static', filename='icons/default_icon.png') }}';" />
+        {% if settings.player_view_health_bar %}
+        {% set pct = (npc.hp / npc.max_hp * 100) if npc.max_hp else 100 %}
+        <div class="hp-bar {{ 'green' if pct>=76 else 'yellow' if pct>=50 else 'orange' if pct>=25 else 'red' }}"></div>
+        {% endif %}
+      </div>
+      {% endfor %}
         </div>
         <div class="info">
           <h2>{{ g.name }}</h2>

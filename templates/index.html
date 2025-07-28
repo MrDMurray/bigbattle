@@ -12,7 +12,7 @@
     <nav class="top-nav">
       <a id="add-group-btn" href="{{ url_for('add_group_page') }}">+ Add NPC Group</a>
       <a href="{{ url_for('player_view') }}" class="nav-link">Player View</a>
-      <a href="#" class="nav-link">Settings</a>
+      <a href="{{ url_for('settings_page') }}" class="nav-link">Settings</a>
     </nav>
     <div id="groups">
       {% for g in groups %}
@@ -24,6 +24,10 @@
             <span class="hp-label">{{ npc.hp }}</span>
             <img src="{{ url_for('static', filename='icons/' + (g.icon if g.icon else 'default_icon.png')) }}"
                  onerror="this.onerror=null;this.src='{{ url_for('static', filename='icons/default_icon.png') }}';" />
+            {% if settings.dm_view_health_bar %}
+            {% set pct = (npc.hp / npc.max_hp * 100) if npc.max_hp else 100 %}
+            <div class="hp-bar {{ 'green' if pct>=76 else 'yellow' if pct>=50 else 'orange' if pct>=25 else 'red' }}"></div>
+            {% endif %}
           </div>
           {% endfor %}
         </div>
