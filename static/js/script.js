@@ -3,6 +3,18 @@ document.getElementById('add-group-btn').addEventListener('click', (e) => {
   window.location.href = '/add_group';
 });
 
+function addLog(text) {
+  const logBox = document.getElementById('log');
+  if (!logBox) return;
+  const div = document.createElement('div');
+  div.textContent = text;
+  logBox.appendChild(div);
+  logBox.scrollTop = logBox.scrollHeight;
+  while (logBox.children.length > 50) {
+    logBox.removeChild(logBox.firstChild);
+  }
+}
+
 // Delete handlers
 document.querySelectorAll('.delete-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -23,6 +35,9 @@ document.querySelectorAll('.attack-form').forEach(form => {
         if (result) {
           result.textContent = `${data.hits} hits, ${data.damage} total damage`;
         }
+        const groupName = form.dataset.groupName || 'Group';
+        const attackName = form.dataset.attackName || 'Attack';
+        addLog(`${groupName} ${attackName}: ${data.hits} hits for ${data.damage}`);
       });
   });
 });

@@ -50,6 +50,8 @@ def add_group():
         "ac": int(data.get("ac", 10)),
         "damage_die": data.get("damage_die", "1d6"),
         "damage_bonus": int(data.get("damage_bonus", 0)),
+        "attack_name": data.get("attack_name", "Attack"),
+        "attack_die": data.get("attack_die", "1d20"),
         "icon": data.get("name", "default_icon") + ".png",
         "npcs": [NPC(base_hp) for _ in range(count)],
     }
@@ -96,14 +98,21 @@ def attack(group_id):
 
     hits = 0
     total_damage = 0
+    attack_die_count, attack_die_size = map(
+        int, group.get("attack_die", "1d20").lower().split("d")
+    )
     for _ in range(len(group.get("npcs", []))):
-        roll = random.randint(1, 20)
+        roll = sum(
+            random.randint(1, attack_die_size) for _ in range(attack_die_count)
+        )
         attack_total = roll + group["damage_bonus"]
         if attack_total >= target_ac:
             hits += 1
-            die_count, die_size = map(int, group["damage_die"].lower().split("d"))
+            dmg_die_count, dmg_die_size = map(
+                int, group["damage_die"].lower().split("d")
+            )
             dmg = (
-                sum(random.randint(1, die_size) for _ in range(die_count))
+                sum(random.randint(1, dmg_die_size) for _ in range(dmg_die_count))
                 + group["damage_bonus"]
             )
             total_damage += dmg
