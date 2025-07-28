@@ -23,6 +23,11 @@ def allowed_file(filename):
 def index():
     return render_template('index.html', groups=npc_groups)
 
+
+@app.route('/add_group', methods=['GET'])
+def add_group_page():
+    return render_template('add_group.html')
+
 @app.route('/add_group', methods=['POST'])
 def add_group():
     global next_id
@@ -35,7 +40,8 @@ def add_group():
         'damage_die': data.get('damage_die', '1d6'),
         'damage_bonus': int(data.get('damage_bonus', 0)),
         'count': int(data.get('count', 1)),
-        'icon': data.get('name', 'default_icon') + '.png'
+        'icon': data.get('name', 'default_icon') + '.png',
+        'individual_hp': [int(data.get('hp', 1)) for _ in range(int(data.get('count', 1)))]
     }
     npc_groups.append(group)
     next_id += 1
@@ -57,6 +63,19 @@ def upload_icon(group_id):
         for g in npc_groups:
             if g['id'] == group_id:
                 g['icon'] = filename
+    return redirect(url_for('index'))
+
+@app.route('/damage/<int:group_id>', methods=['POST'])
+def damage(group_id):
+    dmg = int(request.form.get('damage', 0))
+    group = next((g for g in npc_groups if g['id'] == group_id), None)
+    if group and group.get('individual_hp'):
+        # find index of npc with lowest hp
+        idx = group['individual_hp'].index(min(group['individual_hp']))
+        group['individual_hp'][idx] -= dmg
+        if group['individual_hp'][idx] <= 0:
+            group['individual_hp'].pop(idx)
+            group['count'] = len(group['individual_hp'])
     return redirect(url_for('index'))
 
 @app.route('/attack/<int:group_id>', methods=['POST'])
