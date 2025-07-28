@@ -26,9 +26,8 @@
           <h2>{{ g.name }}</h2>
           <p>Group Total HP: {{ g.total_hp }} &nbsp; NPCs Remaining: {{ g.count }}</p>
           <form class="attack-form" data-group-name="{{ g.name }}" data-attack-name="{{ g.attack_name }}" action="{{ url_for('attack', group_id=g.id) }}" method="post">
-            <input type="number" name="target_ac" value="10" min="1" />
             <button type="submit">{{ g.attack_name or 'Attack' }}</button>
-            <span class="attack-die">({{ g.attack_die }})</span>
+            <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span>
           </form>
           <div class="attack-result" id="result-{{ g.id }}"></div>
           <form class="damage-form" action="{{ url_for('damage', group_id=g.id) }}" method="post">
