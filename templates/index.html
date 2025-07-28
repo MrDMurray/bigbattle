@@ -38,7 +38,9 @@
             
 			<form class="attack-form" data-group-name="{{ g.name }}" data-attack-name="{{ g.attack_name }}" action="{{ url_for('attack', group_id=g.id) }}" method="post">
               <button type="submit">{{ g.attack_name or 'Attack' }}</button>
-              <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span>
+              <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span><br>
+              <label class="adv-option"><input type="checkbox" name="advantage">Adv</label>
+              <label class="adv-option"><input type="checkbox" name="disadvantage">DisAdv</label>
             </form>
             <form class="damage-form" action="{{ url_for('damage', group_id=g.id) }}" method="post">
               <input type="number" name="damage" value="1" min="0" />
@@ -66,6 +68,16 @@
     </div>
   </div>
   <div id="log-container">
+    <div id="dice-buttons">
+      <button class="dice-btn" data-die="20">d20</button>
+      <button class="dice-btn" data-die="100">d100</button>
+      <button class="dice-btn" data-die="12">d12</button>
+      <button class="dice-btn" data-die="10">d10</button>
+      <button class="dice-btn" data-die="8">d8</button>
+      <button class="dice-btn" data-die="6">d6</button>
+      <button class="dice-btn" data-die="4">d4</button>
+      <button class="dice-btn" data-die="2">d2</button>
+    </div>
     <div id="log"></div>
   </div>
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
