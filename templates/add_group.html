@@ -9,7 +9,16 @@
 <body>
   <div class="container">
     <h1>Add NPC Group</h1>
-    <form action="{{ url_for('add_group') }}" method="post">
+    <div class="template-load">
+      <select id="template-select">
+        <option value="">-- Load Template --</option>
+        {% for t in templates %}
+        <option value="{{ t.id }}" data-name="{{ t.name }}" data-ac="{{ t.ac }}" data-hp="{{ t.hp }}" data-count="{{ t.count }}" data-damage_die="{{ t.damage_die }}" data-damage_bonus="{{ t.damage_bonus }}" data-attack_name="{{ t.attack_name }}" data-attack_bonus="{{ t.attack_bonus }}">{{ t.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="button" id="load-template-btn">Load</button>
+    </div>
+    <form id="group-form" action="{{ url_for('add_group') }}" method="post">
       <label>Name: <input type="text" name="name" required></label><br>
       <label>AC: <input type="number" name="ac" value="10" required></label><br>
       <label>HP: <input type="number" name="hp" value="10" required></label><br>
@@ -19,7 +28,9 @@
       <label>Attack Name: <input type="text" name="attack_name" placeholder="Attack"></label><br>
       <label>Attack Bonus: <input type="number" name="attack_bonus" value="0"></label><br>
       <button type="submit">Create Group</button>
+      <button type="button" id="save-template-btn">Save Template</button>
     </form>
   </div>
+  <script src="{{ url_for('static', filename='js/add_group.js') }}"></script>
 </body>
 </html>
