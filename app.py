@@ -184,6 +184,9 @@ def attack(group_id):
     if not group:
         return jsonify({"error": "Group not found"}), 404
 
+    reach = "reach" in request.form
+    attack_limit = 10 if reach else 3
+
     hits = 0
     total_damage = 0
     logs = []
@@ -193,7 +196,7 @@ def attack(group_id):
     dmg_die_count, dmg_die_size = map(
         int, group["damage_die"].lower().split("d")
     )
-    for idx, _ in enumerate(group.get("npcs", []), start=1):
+    for idx, _ in enumerate(group.get("npcs", [])[:attack_limit], start=1):
         attack_rolls = [random.randint(1, attack_die_size) for _ in range(attack_die_count)]
         roll_total = sum(attack_rolls)
         attack_total = roll_total + group.get("attack_bonus", 0)

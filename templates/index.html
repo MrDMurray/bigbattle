@@ -41,6 +41,7 @@
               <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span><br>
               <label class="adv-option"><input type="checkbox" name="advantage">Adv</label>
               <label class="adv-option"><input type="checkbox" name="disadvantage">DisAdv</label>
+              <label class="adv-option"><input type="checkbox" name="reach">Reach</label>
             </form>
             <form class="damage-form" action="{{ url_for('damage', group_id=g.id) }}" method="post">
               <input type="number" name="damage" value="1" min="0" />
