@@ -74,3 +74,17 @@ document.querySelectorAll('.upload-form input[type="file"]').forEach(input => {
     }
   });
 });
+
+// Quick dice rolls
+document.querySelectorAll('#dice-buttons .dice-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const sides = parseInt(btn.dataset.die, 10);
+    const roll = Math.floor(Math.random() * sides) + 1;
+    const original = btn.textContent;
+    btn.textContent = roll;
+    addLog(`d${sides} roll: ${roll}`);
+    setTimeout(() => {
+      btn.textContent = original;
+    }, 10000);
+  });
+});
