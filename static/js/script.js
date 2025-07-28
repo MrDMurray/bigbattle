@@ -7,6 +7,13 @@ function addLog(text) {
   const logBox = document.getElementById('log');
   if (!logBox) return;
   const div = document.createElement('div');
+  if (/roll/i.test(text)) {
+    div.classList.add('log-roll');
+  } else if (/player/i.test(text)) {
+    div.classList.add('log-player');
+  } else {
+    div.classList.add('log-npc');
+  }
   div.textContent = text;
   logBox.appendChild(div);
   logBox.scrollTop = logBox.scrollHeight;
