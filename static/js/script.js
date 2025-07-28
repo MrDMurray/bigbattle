@@ -46,11 +46,19 @@ document.querySelectorAll('.attack-form').forEach(form => {
         const container = form.closest('.info');
         const result = container ? container.querySelector('.attack-result') : null;
         if (result) {
-          result.textContent = `${data.hits} hits for a total of ${data.damage} damage`;
+          if (data.narration) {
+            result.textContent = data.narration;
+          } else {
+            result.textContent = `${data.hits} hits for a total of ${data.damage} damage`;
+          }
         }
         const groupName = form.dataset.groupName || 'Group';
         const attackName = form.dataset.attackName || 'Attack';
-        addLog(`${groupName} ${attackName}: ${data.hits} hits for a total of ${data.damage} damage`);
+        if (data.narration) {
+          addLog(data.narration);
+        } else {
+          addLog(`${groupName} ${attackName}: ${data.hits} hits for a total of ${data.damage} damage`);
+        }
         if (Array.isArray(data.logs)) {
           data.logs.forEach(l => addLog(l));
         }

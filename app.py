@@ -4,6 +4,9 @@ import os
 import sqlite3
 from dataclasses import dataclass
 from werkzeug.utils import secure_filename
+import openai
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
@@ -188,7 +191,10 @@ def attack(group_id):
     reach = "reach" in request.form
     attack_limit = 10 if reach else 3
 
+    use_ai = "ai" in request.form
+
     hits = 0
+    misses = 0
     total_damage = 0
     logs = []
     attack_die_count, attack_die_size = map(
@@ -218,7 +224,28 @@ def attack(group_id):
             total_damage += dmg_total
         else:
             logs.append(f"{attack_total}<{target_ac} so that's a miss!")
-    return jsonify({"hits": hits, "damage": total_damage, "logs": logs})
+            misses += 1
+    response = {"hits": hits, "damage": total_damage, "logs": logs}
+
+    if use_ai:
+        prompt = (
+            "Create a short second-person narrative describing the attack upon the player. "
+            f"NPC description: {group.get('description', '')}. "
+            f"Enemies remaining: {len(group.get('npcs', []))}. "
+            f"Hits on the player: {hits}. Misses on the player: {misses}."
+        )
+        try:
+            chat_resp = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=80,
+            )
+            narration = chat_resp.choices[0].message.content.strip()
+            response["narration"] = narration
+        except Exception:
+            pass
+
+    return jsonify(response)
 
 if __name__ == "__main__":
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
