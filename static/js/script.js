@@ -28,7 +28,12 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
 document.querySelectorAll('.attack-form').forEach(form => {
   form.addEventListener('submit', e => {
     e.preventDefault();
-    fetch(form.action, { method: 'POST', body: new FormData(form) })
+    const fd = new FormData(form);
+    const acSpan = form.parentElement.querySelector('.player-ac .ac-value');
+    if (acSpan) {
+      fd.append('target_ac', parseInt(acSpan.textContent, 10));
+    }
+    fetch(form.action, { method: 'POST', body: fd })
       .then(res => res.json())
       .then(data => {
         const result = form.parentElement.querySelector('.attack-result');
@@ -38,6 +43,9 @@ document.querySelectorAll('.attack-form').forEach(form => {
         const groupName = form.dataset.groupName || 'Group';
         const attackName = form.dataset.attackName || 'Attack';
         addLog(`${groupName} ${attackName}: ${data.hits} hits for ${data.damage}`);
+        if (Array.isArray(data.logs)) {
+          data.logs.forEach(l => addLog(l));
+        }
       });
   });
 });

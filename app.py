@@ -51,7 +51,8 @@ def add_group():
         "damage_die": data.get("damage_die", "1d6"),
         "damage_bonus": int(data.get("damage_bonus", 0)),
         "attack_name": data.get("attack_name", "Attack"),
-        "attack_die": data.get("attack_die", "1d20"),
+        "attack_bonus": int(data.get("attack_bonus", 0)),
+        "attack_die": "1d20",
         "icon": data.get("name", "default_icon") + ".png",
         "npcs": [NPC(base_hp) for _ in range(count)],
     }
@@ -98,25 +99,35 @@ def attack(group_id):
 
     hits = 0
     total_damage = 0
+    logs = []
     attack_die_count, attack_die_size = map(
         int, group.get("attack_die", "1d20").lower().split("d")
     )
-    for _ in range(len(group.get("npcs", []))):
-        roll = sum(
-            random.randint(1, attack_die_size) for _ in range(attack_die_count)
+    dmg_die_count, dmg_die_size = map(
+        int, group["damage_die"].lower().split("d")
+    )
+    for idx, _ in enumerate(group.get("npcs", []), start=1):
+        attack_rolls = [random.randint(1, attack_die_size) for _ in range(attack_die_count)]
+        roll_total = sum(attack_rolls)
+        attack_total = roll_total + group.get("attack_bonus", 0)
+        logs.append(
+            f"{group['name']}{idx} rolls to attack: {group['attack_die']}+{group.get('attack_bonus', 0)} = "
+            f"{' + '.join(str(r) for r in attack_rolls)} + {group.get('attack_bonus', 0)} = {attack_total} to hit"
         )
-        attack_total = roll + group["damage_bonus"]
+        logs.append(f"Player AC is {target_ac}")
         if attack_total >= target_ac:
+            logs.append(f"{attack_total}>={target_ac} so that's a hit!")
+            dmg_rolls = [random.randint(1, dmg_die_size) for _ in range(dmg_die_count)]
+            dmg_total = sum(dmg_rolls) + group.get("damage_bonus", 0)
+            logs.append(
+                f"{group['name']}{idx} rolls for damage: {group['damage_die']} = "
+                f"{' + '.join(str(r) for r in dmg_rolls)} + {group.get('damage_bonus', 0)} = {dmg_total} damage"
+            )
             hits += 1
-            dmg_die_count, dmg_die_size = map(
-                int, group["damage_die"].lower().split("d")
-            )
-            dmg = (
-                sum(random.randint(1, dmg_die_size) for _ in range(dmg_die_count))
-                + group["damage_bonus"]
-            )
-            total_damage += dmg
-    return jsonify({"hits": hits, "damage": total_damage})
+            total_damage += dmg_total
+        else:
+            logs.append(f"{attack_total}<{target_ac} so that's a miss!")
+    return jsonify({"hits": hits, "damage": total_damage, "logs": logs})
 
 if __name__ == "__main__":
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
