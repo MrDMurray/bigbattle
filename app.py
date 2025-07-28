@@ -15,6 +15,10 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # instances which track their own hit points.
 npc_groups = []  # list of dicts
 next_id = 1
+settings = {
+    "dm_view_health_bar": True,
+    "player_view_health_bar": True,
+}
 
 
 def init_db():
@@ -42,6 +46,7 @@ def init_db():
 @dataclass
 class NPC:
     hp: int
+    max_hp: int
 
 
 def allowed_file(filename):
@@ -54,14 +59,22 @@ def index():
     for g in npc_groups:
         g["total_hp"] = sum(n.hp for n in g.get("npcs", []))
         g["count"] = len(g.get("npcs", []))
-    return render_template("index.html", groups=npc_groups)
+    return render_template("index.html", groups=npc_groups, settings=settings)
 
 
 @app.route('/player_view', methods=['GET'])
 def player_view():
     for g in npc_groups:
         g["count"] = len(g.get("npcs", []))
-    return render_template('player_view.html', groups=npc_groups)
+    return render_template('player_view.html', groups=npc_groups, settings=settings)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings_page():
+    if request.method == 'POST':
+        settings['dm_view_health_bar'] = 'dm_view_health_bar' in request.form
+        settings['player_view_health_bar'] = 'player_view_health_bar' in request.form
+    return render_template('settings.html', settings=settings)
 
 
 @app.route('/add_group', methods=['GET'])
@@ -103,7 +116,8 @@ def add_group():
         "attack_bonus": int(data.get("attack_bonus", 0)),
         "attack_die": "1d20",
         "icon": data.get("name", "default_icon") + ".png",
-        "npcs": [NPC(base_hp) for _ in range(count)],
+        "base_hp": base_hp,
+        "npcs": [NPC(base_hp, base_hp) for _ in range(count)],
     }
     npc_groups.append(group)
     next_id += 1

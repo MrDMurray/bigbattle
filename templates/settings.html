@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Settings</h1>
+    <form action="{{ url_for('settings_page') }}" method="post">
+      <div class="settings-section">
+        <h2>DM View</h2>
+        <label><input type="checkbox" name="dm_view_health_bar" {% if settings.dm_view_health_bar %}checked{% endif %}> Show Health Bar</label>
+      </div>
+      <div class="settings-section">
+        <h2>Player View</h2>
+        <label><input type="checkbox" name="player_view_health_bar" {% if settings.player_view_health_bar %}checked{% endif %}> Show Health Bar</label>
+      </div>
+      <button type="submit">Save Settings</button>
+    </form>
+    <nav class="top-nav">
+      <a href="{{ url_for('index') }}">Back to DM View</a>
+    </nav>
+  </div>
+</body>
+</html>
