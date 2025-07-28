@@ -1,18 +1,24 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-import random, os
+import random
+import os
+from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 
-print("hello world")
-
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# In-memory store for npc groups
-npc_groups = []  # list of dicts: {id, name, ac, hp, damage_die, damage_bonus, count, icon}
+# In-memory store for npc groups.  Each group contains a list of NPC
+# instances which track their own hit points.
+npc_groups = []  # list of dicts
 next_id = 1
+
+
+@dataclass
+class NPC:
+    hp: int
 
 
 def allowed_file(filename):
@@ -21,7 +27,11 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html', groups=npc_groups)
+    # Calculate total HP for each group before rendering
+    for g in npc_groups:
+        g["total_hp"] = sum(n.hp for n in g.get("npcs", []))
+        g["count"] = len(g.get("npcs", []))
+    return render_template("index.html", groups=npc_groups)
 
 
 @app.route('/add_group', methods=['GET'])
@@ -32,16 +42,16 @@ def add_group_page():
 def add_group():
     global next_id
     data = request.form
+    base_hp = int(data.get("hp", 1))
+    count = int(data.get("count", 1))
     group = {
-        'id': next_id,
-        'name': data.get('name', 'Darkrider'),
-        'ac': int(data.get('ac', 10)),
-        'hp': int(data.get('hp', 1)),
-        'damage_die': data.get('damage_die', '1d6'),
-        'damage_bonus': int(data.get('damage_bonus', 0)),
-        'count': int(data.get('count', 1)),
-        'icon': data.get('name', 'default_icon') + '.png',
-        'individual_hp': [int(data.get('hp', 1)) for _ in range(int(data.get('count', 1)))]
+        "id": next_id,
+        "name": data.get("name", "Darkrider"),
+        "ac": int(data.get("ac", 10)),
+        "damage_die": data.get("damage_die", "1d6"),
+        "damage_bonus": int(data.get("damage_bonus", 0)),
+        "icon": data.get("name", "default_icon") + ".png",
+        "npcs": [NPC(base_hp) for _ in range(count)],
     }
     npc_groups.append(group)
     next_id += 1
@@ -65,38 +75,40 @@ def upload_icon(group_id):
                 g['icon'] = filename
     return redirect(url_for('index'))
 
-@app.route('/damage/<int:group_id>', methods=['POST'])
+@app.route("/damage/<int:group_id>", methods=["POST"])
 def damage(group_id):
-    dmg = int(request.form.get('damage', 0))
-    group = next((g for g in npc_groups if g['id'] == group_id), None)
-    if group and group.get('individual_hp'):
-        # find index of npc with lowest hp
-        idx = group['individual_hp'].index(min(group['individual_hp']))
-        group['individual_hp'][idx] -= dmg
-        if group['individual_hp'][idx] <= 0:
-            group['individual_hp'].pop(idx)
-            group['count'] = len(group['individual_hp'])
-    return redirect(url_for('index'))
+    dmg = int(request.form.get("damage", 0))
+    group = next((g for g in npc_groups if g["id"] == group_id), None)
+    if group and group.get("npcs"):
+        # Target the NPC with the lowest remaining HP
+        target = min(group["npcs"], key=lambda n: n.hp)
+        target.hp -= dmg
+        if target.hp <= 0:
+            group["npcs"].remove(target)
+    return redirect(url_for("index"))
 
-@app.route('/attack/<int:group_id>', methods=['POST'])
+@app.route("/attack/<int:group_id>", methods=["POST"])
 def attack(group_id):
-    target_ac = int(request.form.get('target_ac', 10))
-    group = next((g for g in npc_groups if g['id'] == group_id), None)
+    target_ac = int(request.form.get("target_ac", 10))
+    group = next((g for g in npc_groups if g["id"] == group_id), None)
     if not group:
-        return jsonify({'error': 'Group not found'}), 404
+        return jsonify({"error": "Group not found"}), 404
 
     hits = 0
     total_damage = 0
-    for _ in range(group['count']):
+    for _ in range(len(group.get("npcs", []))):
         roll = random.randint(1, 20)
-        attack_total = roll + (group['damage_bonus'])
+        attack_total = roll + group["damage_bonus"]
         if attack_total >= target_ac:
             hits += 1
-            die_count, die_size = map(int, group['damage_die'].lower().split('d'))
-            dmg = sum(random.randint(1, die_size) for _ in range(die_count)) + group['damage_bonus']
+            die_count, die_size = map(int, group["damage_die"].lower().split("d"))
+            dmg = (
+                sum(random.randint(1, die_size) for _ in range(die_count))
+                + group["damage_bonus"]
+            )
             total_damage += dmg
-    return jsonify({'hits': hits, 'damage': total_damage})
+    return jsonify({"hits": hits, "damage": total_damage})
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     app.run(debug=True)
