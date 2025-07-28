@@ -19,7 +19,34 @@ document.querySelectorAll('.attack-form').forEach(form => {
     fetch(form.action, { method: 'POST', body: new FormData(form) })
       .then(res => res.json())
       .then(data => {
-        alert(`${data.hits} hits, ${data.damage} total damage`);
+        const result = form.parentElement.querySelector('.attack-result');
+        if (result) {
+          result.textContent = `${data.hits} hits, ${data.damage} total damage`;
+        }
       });
+  });
+});
+
+// Player AC adjustment
+document.querySelectorAll('.ac-inc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const span = btn.parentElement.querySelector('.ac-value');
+    span.textContent = parseInt(span.textContent, 10) + 1;
+  });
+});
+
+document.querySelectorAll('.ac-dec').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const span = btn.parentElement.querySelector('.ac-value');
+    span.textContent = Math.max(0, parseInt(span.textContent, 10) - 1);
+  });
+});
+
+// Auto upload icon when file chosen
+document.querySelectorAll('.upload-form input[type="file"]').forEach(input => {
+  input.addEventListener('change', () => {
+    if (input.files.length > 0) {
+      input.closest('form').submit();
+    }
   });
 });
