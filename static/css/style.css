@@ -10,4 +10,10 @@ body { font-family: sans-serif; background: #2b2b2b; color: #f0f0f0; }
 .info { margin-top: 10px; }
 button { cursor: pointer; transition: transform 0.1s; }
 button:active { transform: scale(0.95); }
+
+.attack-result { font-size: 14px; margin: 4px 0; }
+.player-ac { display: flex; align-items: center; gap: 4px; font-size: 14px; }
+.ac-btn { padding: 2px 6px; }
+.small-btn { font-size: 12px; padding: 2px 6px; }
+.file-input { font-size: 12px; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
