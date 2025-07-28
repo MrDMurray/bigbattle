@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add NPC Group</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Add NPC Group</h1>
+    <form action="{{ url_for('add_group') }}" method="post">
+      <label>Name: <input type="text" name="name" required></label><br>
+      <label>AC: <input type="number" name="ac" value="10" required></label><br>
+      <label>HP: <input type="number" name="hp" value="10" required></label><br>
+      <label>Count: <input type="number" name="count" value="1" min="1" max="25" required></label><br>
+      <label>Damage Die: <input type="text" name="damage_die" value="1d6"></label><br>
+      <label>Damage Bonus: <input type="number" name="damage_bonus" value="0"></label><br>
+      <button type="submit">Create Group</button>
+    </form>
+  </div>
+</body>
+</html>
