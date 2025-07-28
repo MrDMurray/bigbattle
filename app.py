@@ -57,6 +57,13 @@ def index():
     return render_template("index.html", groups=npc_groups)
 
 
+@app.route('/player_view', methods=['GET'])
+def player_view():
+    for g in npc_groups:
+        g["count"] = len(g.get("npcs", []))
+    return render_template('player_view.html', groups=npc_groups)
+
+
 @app.route('/add_group', methods=['GET'])
 def add_group_page():
     conn = sqlite3.connect('saved_info.db')
