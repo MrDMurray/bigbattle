@@ -110,6 +110,7 @@ def add_group():
         "id": next_id,
         "name": data.get("name", "Darkrider"),
         "ac": int(data.get("ac", 10)),
+        "description": data.get("description", ""),
         "damage_die": data.get("damage_die", "1d6"),
         "damage_bonus": int(data.get("damage_bonus", 0)),
         "attack_name": data.get("attack_name", "Attack"),

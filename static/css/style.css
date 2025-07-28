@@ -59,6 +59,10 @@ button:active { transform: scale(0.95); }
   font-size: 12px;
 }
 
+.log-npc { color: #9b59b6; }
+.log-player { color: #3498db; }
+.log-roll { color: #f1c40f; }
+
 .hp-bar {
   width: 100%;
   height: 4px;
