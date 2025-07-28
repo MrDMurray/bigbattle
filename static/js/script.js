@@ -36,7 +36,8 @@ document.querySelectorAll('.attack-form').forEach(form => {
     fetch(form.action, { method: 'POST', body: fd })
       .then(res => res.json())
       .then(data => {
-        const result = form.parentElement.querySelector('.attack-result');
+        const container = form.closest('.info');
+        const result = container ? container.querySelector('.attack-result') : null;
         if (result) {
           result.textContent = `${data.hits} hits for a total of ${data.damage} damage`;
         }

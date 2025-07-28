@@ -1,4 +1,6 @@
 body { font-family: sans-serif; background: #2b2b2b; color: #f0f0f0; }
+.top-nav { display: flex; gap: 10px; margin-bottom: 10px; }
+.top-nav a { color: #f0f0f0; text-decoration: none; padding: 4px 8px; }
 .container { max-width: 1200px; margin: auto; padding: 20px; }
 #groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
 .group { background: #3b3b3b; padding: 6px; border-radius: 8px; width: 200px; position: relative;
@@ -11,6 +13,9 @@ body { font-family: sans-serif; background: #2b2b2b; color: #f0f0f0; }
 .info { margin-top: 10px; }
 .stats-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .damage-form { display: inline-flex; align-items: center; gap: 4px; }
+.damage-form input[type="number"] {
+  width: 4ch;
+}
 button { cursor: pointer; transition: transform 0.1s; }
 button:active { transform: scale(0.95); }
 
