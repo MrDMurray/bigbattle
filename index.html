@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Battle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Big Battle</h1>
+    <div id="add-npc-form">
+        <h2>Add NPC Group</h2>
+        <label>Name: <input type="text" id="npc-name"></label>
+        <label>Count: <input type="number" id="npc-count" value="1" min="1"></label>
+        <label>Max Health: <input type="number" id="npc-health" value="10" min="1"></label>
+        <button id="add-npc">Add</button>
+    </div>
+    <div id="npc-grid" class="grid"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
