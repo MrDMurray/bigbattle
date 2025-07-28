@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import random
 import os
+import sqlite3
 from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 
@@ -14,6 +15,28 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # instances which track their own hit points.
 npc_groups = []  # list of dicts
 next_id = 1
+
+
+def init_db():
+    conn = sqlite3.connect("saved_info.db")
+    cur = conn.cursor()
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            ac INTEGER,
+            hp INTEGER,
+            count INTEGER,
+            damage_die TEXT,
+            damage_bonus INTEGER,
+            attack_name TEXT,
+            attack_bonus INTEGER
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
 
 
 @dataclass
@@ -36,7 +59,26 @@ def index():
 
 @app.route('/add_group', methods=['GET'])
 def add_group_page():
-    return render_template('add_group.html')
+    conn = sqlite3.connect('saved_info.db')
+    cur = conn.cursor()
+    cur.execute('SELECT id, name, ac, hp, count, damage_die, damage_bonus, attack_name, attack_bonus FROM templates')
+    rows = cur.fetchall()
+    conn.close()
+    templates = [
+        {
+            'id': r[0],
+            'name': r[1],
+            'ac': r[2],
+            'hp': r[3],
+            'count': r[4],
+            'damage_die': r[5],
+            'damage_bonus': r[6],
+            'attack_name': r[7],
+            'attack_bonus': r[8],
+        }
+        for r in rows
+    ]
+    return render_template('add_group.html', templates=templates)
 
 @app.route('/add_group', methods=['POST'])
 def add_group():
@@ -59,6 +101,30 @@ def add_group():
     npc_groups.append(group)
     next_id += 1
     return redirect(url_for('index'))
+
+
+@app.route('/save_template', methods=['POST'])
+def save_template():
+    data = request.form
+    conn = sqlite3.connect('saved_info.db')
+    cur = conn.cursor()
+    cur.execute(
+        'INSERT INTO templates (name, ac, hp, count, damage_die, damage_bonus, attack_name, attack_bonus) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        (
+            data.get('name'),
+            int(data.get('ac', 10)),
+            int(data.get('hp', 1)),
+            int(data.get('count', 1)),
+            data.get('damage_die', '1d6'),
+            int(data.get('damage_bonus', 0)),
+            data.get('attack_name', 'Attack'),
+            int(data.get('attack_bonus', 0)),
+        ),
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for('add_group_page'))
 
 @app.route('/delete_group/<int:group_id>', methods=['POST'])
 def delete_group(group_id):
@@ -131,4 +197,5 @@ def attack(group_id):
 
 if __name__ == "__main__":
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    init_db()
     app.run(debug=True)

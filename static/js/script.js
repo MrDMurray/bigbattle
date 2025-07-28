@@ -38,11 +38,11 @@ document.querySelectorAll('.attack-form').forEach(form => {
       .then(data => {
         const result = form.parentElement.querySelector('.attack-result');
         if (result) {
-          result.textContent = `${data.hits} hits, ${data.damage} total damage`;
+          result.textContent = `${data.hits} hits for a total of ${data.damage} damage`;
         }
         const groupName = form.dataset.groupName || 'Group';
         const attackName = form.dataset.attackName || 'Attack';
-        addLog(`${groupName} ${attackName}: ${data.hits} hits for ${data.damage}`);
+        addLog(`${groupName} ${attackName}: ${data.hits} hits for a total of ${data.damage} damage`);
         if (Array.isArray(data.logs)) {
           data.logs.forEach(l => addLog(l));
         }
