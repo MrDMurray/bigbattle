@@ -30,16 +30,17 @@
         <div class="info">
           <h2>{{ g.name }}</h2>
           <div class="stats-row">
-            <span>HP {{ g.total_hp }} ({{ g.count }})</span>
-            <form class="attack-form" data-group-name="{{ g.name }}" data-attack-name="{{ g.attack_name }}" action="{{ url_for('attack', group_id=g.id) }}" method="post">
+            <span>Total Group HP: {{ g.total_hp }} Enemies Remaining: {{ g.count }}</span>
+            
+			<form class="attack-form" data-group-name="{{ g.name }}" data-attack-name="{{ g.attack_name }}" action="{{ url_for('attack', group_id=g.id) }}" method="post">
               <button type="submit">{{ g.attack_name or 'Attack' }}</button>
               <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span>
             </form>
             <form class="damage-form" action="{{ url_for('damage', group_id=g.id) }}" method="post">
               <input type="number" name="damage" value="1" min="0" />
-              <button type="submit">DMG</button>
+              <button type="submit">Reduce Mob HP</button>
             </form>
-            <p class="player-ac">AC:
+            <p class="player-ac">Player AC:
               <button type="button" class="ac-btn ac-dec" data-id="{{ g.id }}">-</button>
               <span class="ac-value">{{ g.ac }}</span>
               <button type="button" class="ac-btn ac-inc" data-id="{{ g.id }}">+</button>
