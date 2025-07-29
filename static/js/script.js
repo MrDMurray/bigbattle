@@ -7,7 +7,9 @@ function addLog(text) {
   const logBox = document.getElementById('log');
   if (!logBox) return;
   const div = document.createElement('div');
-  if (/roll/i.test(text)) {
+  if (/^Narration:/i.test(text)) {
+    div.classList.add('log-narration');
+  } else if (/roll/i.test(text)) {
     div.classList.add('log-roll');
   } else if (/player/i.test(text)) {
     div.classList.add('log-player');
@@ -46,11 +48,7 @@ document.querySelectorAll('.attack-form').forEach(form => {
         const container = form.closest('.info');
         const result = container ? container.querySelector('.attack-result') : null;
         if (result) {
-          if (data.narration) {
-            result.textContent = data.narration;
-          } else {
-            result.textContent = `${data.hits} hits for a total of ${data.damage} damage`;
-          }
+          result.textContent = `${data.hits} hits for a total of ${data.damage} damage`;
         }
         const groupName = form.dataset.groupName || 'Group';
         const attackName = form.dataset.attackName || 'Attack';
