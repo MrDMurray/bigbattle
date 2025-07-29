@@ -68,6 +68,43 @@ document.querySelectorAll('.attack-form').forEach(form => {
   });
 });
 
+// Handle mob damage without page reload
+document.querySelectorAll('.damage-form').forEach(form => {
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    fetch(form.action, { method: 'POST', body: fd })
+      .then(res => res.json())
+      .then(data => {
+        const group = form.closest('.group');
+        if (!group) return;
+        // Update stats line
+        const statsSpan = group.querySelector('.stats-row span');
+        if (statsSpan) {
+          statsSpan.textContent = `Total Group HP: ${data.total_hp} Enemies Remaining: ${data.count}`;
+        }
+        const cells = group.querySelectorAll('.grid .cell');
+        // Update each cell's HP label and bar
+        data.npc_hps.forEach((hp, idx) => {
+          const cell = cells[idx];
+          if (!cell) return;
+          const hpLabel = cell.querySelector('.hp-label');
+          if (hpLabel) hpLabel.textContent = hp;
+          const bar = cell.querySelector('.hp-bar');
+          if (bar) {
+            const max = parseInt(cell.dataset.maxHp || hp, 10) || 1;
+            const pct = Math.floor((hp / max) * 100);
+            bar.className = 'hp-bar ' + (pct >= 76 ? 'green' : pct >= 50 ? 'yellow' : pct >= 25 ? 'orange' : 'red');
+          }
+        });
+        // Remove dead cells
+        for (let i = data.npc_hps.length; i < cells.length; i++) {
+          cells[i].remove();
+        }
+      });
+  });
+});
+
 // Player AC adjustment
 document.querySelectorAll('.ac-inc').forEach(btn => {
   btn.addEventListener('click', () => {

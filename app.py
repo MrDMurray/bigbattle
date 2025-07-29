@@ -214,7 +214,10 @@ def damage(group_id):
         target.hp -= dmg
         if target.hp <= 0:
             group["npcs"].remove(target)
-    return redirect(url_for("index"))
+    total_hp = sum(n.hp for n in group.get("npcs", [])) if group else 0
+    count = len(group.get("npcs", [])) if group else 0
+    npc_hps = [n.hp for n in group.get("npcs", [])] if group else []
+    return jsonify({"total_hp": total_hp, "count": count, "npc_hps": npc_hps})
 
 @app.route("/attack/<int:group_id>", methods=["POST"])
 def attack(group_id):
@@ -227,6 +230,10 @@ def attack(group_id):
     attack_limit = 10 if reach else 3
 
     use_ai = "ai" in request.form
+    advantage = "advantage" in request.form
+    disadvantage = "disadvantage" in request.form
+    if advantage and disadvantage:
+        advantage = disadvantage = False
 
     hits = 0
     misses = 0
@@ -239,13 +246,35 @@ def attack(group_id):
         int, group["damage_die"].lower().split("d")
     )
     for idx, _ in enumerate(group.get("npcs", [])[:attack_limit], start=1):
-        attack_rolls = [random.randint(1, attack_die_size) for _ in range(attack_die_count)]
-        roll_total = sum(attack_rolls)
-        attack_total = roll_total + group.get("attack_bonus", 0)
-        logs.append(
-            f"{group['name']}{idx} rolls to attack: {group['attack_die']}+{group.get('attack_bonus', 0)} = "
-            f"{' + '.join(str(r) for r in attack_rolls)} + {group.get('attack_bonus', 0)} = {attack_total} to hit"
-        )
+        first_rolls = [random.randint(1, attack_die_size) for _ in range(attack_die_count)]
+        first_total = sum(first_rolls)
+        chosen_total = first_total
+        desc = ""
+        if advantage or disadvantage:
+            second_rolls = [random.randint(1, attack_die_size) for _ in range(attack_die_count)]
+            second_total = sum(second_rolls)
+            if advantage:
+                chosen_total = max(first_total, second_total)
+                desc = "with advantage"
+            else:
+                chosen_total = min(first_total, second_total)
+                desc = "with disadvantage"
+            logs.append(
+                f"{group['name']}{idx} rolls to attack {desc}: {first_total} and {second_total}"
+            )
+            logs.append(
+                f"Using {'highest' if advantage else 'lowest'} roll {chosen_total}"
+            )
+            attack_total = chosen_total + group.get("attack_bonus", 0)
+            logs.append(
+                f"{chosen_total} + {group.get('attack_bonus', 0)} = {attack_total} to hit"
+            )
+        else:
+            logs.append(
+                f"{group['name']}{idx} rolls to attack: {group['attack_die']}+{group.get('attack_bonus', 0)} = "
+                f"{' + '.join(str(r) for r in first_rolls)} + {group.get('attack_bonus', 0)} = {first_total + group.get('attack_bonus', 0)} to hit"
+            )
+            attack_total = chosen_total + group.get("attack_bonus", 0)
         logs.append(f"Player AC is {target_ac}")
         if attack_total >= target_ac:
             logs.append(f"{attack_total}>={target_ac} so that's a hit!")
