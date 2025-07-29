@@ -18,6 +18,12 @@
         <h2>Player View</h2>
         <label><input type="checkbox" name="player_view_health_bar" {% if settings.player_view_health_bar %}checked{% endif %}> Show Health Bar</label>
       </div>
+      <div class="settings-section">
+        <h2>OpenAI</h2>
+        <label>API Key:
+          <input type="password" name="openai_api_key" value="{{ settings.openai_api_key }}" placeholder="sk-...">
+        </label>
+      </div>
       <button type="submit">Save Settings</button>
     </form>
     <nav class="top-nav">
