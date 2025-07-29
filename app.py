@@ -7,6 +7,10 @@ from werkzeug.utils import secure_filename
 import openai
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    print("WARNING: OPENAI_API_KEY environment variable not set")
+else:
+    print("DEBUG: OPENAI_API_KEY loaded")
 
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
@@ -234,6 +238,7 @@ def attack(group_id):
             f"Enemies remaining: {len(group.get('npcs', []))}. "
             f"Hits on the player: {hits}. Misses on the player: {misses}."
         )
+        print(f"DEBUG: OpenAI prompt: {prompt}")
         try:
             chat_resp = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
@@ -242,9 +247,11 @@ def attack(group_id):
             )
             narration = chat_resp.choices[0].message.content.strip()
             response["narration"] = narration
-        except Exception:
-            pass
+            print(f"DEBUG: OpenAI narration: {narration}")
+        except Exception as e:
+            print(f"ERROR calling OpenAI API: {e}")
 
+    print(f"DEBUG: attack response: {response}")
     return jsonify(response)
 
 if __name__ == "__main__":
