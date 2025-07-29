@@ -6,11 +6,12 @@ from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 import openai
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+initial_openai_key = os.getenv("OPENAI_API_KEY", "")
+openai.api_key = initial_openai_key
 if not openai.api_key:
-    print("WARNING: OPENAI_API_KEY environment variable not set")
+    print("WARNING: OpenAI API key not configured")
 else:
-    print("DEBUG: OPENAI_API_KEY loaded")
+    print("DEBUG: OpenAI API key loaded from environment")
 
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
@@ -25,7 +26,9 @@ next_id = 1
 settings = {
     "dm_view_health_bar": True,
     "player_view_health_bar": True,
+    "openai_api_key": initial_openai_key,
 }
+openai.api_key = settings["openai_api_key"]
 
 
 def init_db():
@@ -81,6 +84,8 @@ def settings_page():
     if request.method == 'POST':
         settings['dm_view_health_bar'] = 'dm_view_health_bar' in request.form
         settings['player_view_health_bar'] = 'player_view_health_bar' in request.form
+        settings['openai_api_key'] = request.form.get('openai_api_key', '').strip()
+        openai.api_key = settings['openai_api_key']
     return render_template('settings.html', settings=settings)
 
 
@@ -232,6 +237,7 @@ def attack(group_id):
     response = {"hits": hits, "damage": total_damage, "logs": logs}
 
     if use_ai:
+        openai.api_key = settings.get("openai_api_key", "")
         prompt = (
             "Create a short second-person narrative describing the attack upon the player. "
             f"NPC description: {group.get('description', '')}. "
