@@ -62,6 +62,7 @@ button:active { transform: scale(0.95); }
 .log-npc { color: #9b59b6; }
 .log-player { color: #3498db; }
 .log-roll { color: #f1c40f; }
+.log-narration { color: #ffffff; }
 
 .hp-bar {
   width: 100%;
