@@ -239,17 +239,18 @@ def attack(group_id):
     if use_ai:
         openai.api_key = settings.get("openai_api_key", "")
         prompt = (
-            "Create a short second-person narrative describing the attack upon the player. "
+            "Create a short second-person narrative describing the attack upon the player for a DnD mob battle app that describes a simple attack roll in an epic way. The location is in the middle of a huge battle and the player has been fighting multiple enemies in the chaos. There is no need to describe the setting, start with the attack itself. This particular attack has the following features:"
             f"NPC description: {group.get('description', '')}. "
             f"Enemies remaining: {len(group.get('npcs', []))}. "
             f"Hits on the player: {hits}. Misses on the player: {misses}."
+            f"Keep the narration to 100 words or less"
         )
         print(f"DEBUG: OpenAI prompt: {prompt}")
         try:
             chat_resp = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=80,
+                max_tokens=200,
             )
             narration = chat_resp.choices[0].message.content.strip()
             response["narration"] = narration
