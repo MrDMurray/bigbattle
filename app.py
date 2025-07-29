@@ -5,14 +5,12 @@ import sqlite3
 from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 import openai
-import importlib.util
-
-initial_openai_key = os.getenv("OPENAI_API_KEY", "")
-if not initial_openai_key and os.path.exists("thekey.py"):
-    spec = importlib.util.spec_from_file_location("thekey", "thekey.py")
-    thekey = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(thekey)
-    initial_openai_key = getattr(thekey, "OPENAI_API_KEY", "")
+initial_openai_key = ""
+if os.path.exists("thekey.txt"):
+    with open("thekey.txt", "r") as f:
+        initial_openai_key = f.read().strip()
+if not initial_openai_key:
+    initial_openai_key = os.getenv("OPENAI_API_KEY", "")
 
 openai.api_key = initial_openai_key
 if not openai.api_key:
@@ -98,8 +96,8 @@ def settings_page():
         settings['player_view_health_bar'] = 'player_view_health_bar' in request.form
         settings['openai_api_key'] = request.form.get('openai_api_key', '').strip()
         openai.api_key = settings['openai_api_key']
-        with open('thekey.py', 'w') as f:
-            f.write(f"OPENAI_API_KEY = {settings['openai_api_key']!r}\n")
+        with open('thekey.txt', 'w') as f:
+            f.write(settings['openai_api_key'])
     return render_template('settings.html', settings=settings)
 
 
