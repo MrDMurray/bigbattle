@@ -54,11 +54,15 @@ document.querySelectorAll('.attack-form').forEach(form => {
         }
         const groupName = form.dataset.groupName || 'Group';
         const attackName = form.dataset.attackName || 'Attack';
+
+        // Always show damage summary in the log
+        addLog(`${groupName} ${attackName}: ${data.hits} hits for a total of ${data.damage} damage`);
+
+        // Include any AI generated narration as a separate entry
         if (data.narration) {
-          addLog(data.narration);
-        } else {
-          addLog(`${groupName} ${attackName}: ${data.hits} hits for a total of ${data.damage} damage`);
+          addLog(`Narration: ${data.narration}`);
         }
+
         if (Array.isArray(data.logs)) {
           data.logs.forEach(l => addLog(l));
         }
