@@ -13,10 +13,11 @@
       <select id="template-select">
         <option value="">-- Load Template --</option>
         {% for t in templates %}
-        <option value="{{ t.id }}" data-name="{{ t.name }}" data-ac="{{ t.ac }}" data-hp="{{ t.hp }}" data-count="{{ t.count }}" data-damage_die="{{ t.damage_die }}" data-damage_bonus="{{ t.damage_bonus }}" data-attack_name="{{ t.attack_name }}" data-attack_bonus="{{ t.attack_bonus }}">{{ t.name }}</option>
+        <option value="{{ t.id }}" data-name="{{ t.name }}" data-ac="{{ t.ac }}" data-hp="{{ t.hp }}" data-count="{{ t.count }}" data-damage_die="{{ t.damage_die }}" data-damage_bonus="{{ t.damage_bonus }}" data-attack_name="{{ t.attack_name }}" data-attack_bonus="{{ t.attack_bonus }}" data-description="{{ t.description }}">{{ t.name }}</option>
         {% endfor %}
       </select>
       <button type="button" id="load-template-btn">Load</button>
+      <button type="button" id="delete-template-btn">Delete</button>
     </div>
     <form id="group-form" action="{{ url_for('add_group') }}" method="post">
       <label>Name: <input type="text" name="name" required></label><br>

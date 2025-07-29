@@ -5,13 +5,20 @@ import sqlite3
 from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 import openai
+import importlib.util
 
 initial_openai_key = os.getenv("OPENAI_API_KEY", "")
+if not initial_openai_key and os.path.exists("thekey.py"):
+    spec = importlib.util.spec_from_file_location("thekey", "thekey.py")
+    thekey = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(thekey)
+    initial_openai_key = getattr(thekey, "OPENAI_API_KEY", "")
+
 openai.api_key = initial_openai_key
 if not openai.api_key:
     print("WARNING: OpenAI API key not configured")
 else:
-    print("DEBUG: OpenAI API key loaded from environment")
+    print("DEBUG: OpenAI API key loaded from environment or file")
 
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
@@ -45,10 +52,15 @@ def init_db():
             damage_die TEXT,
             damage_bonus INTEGER,
             attack_name TEXT,
-            attack_bonus INTEGER
+            attack_bonus INTEGER,
+            description TEXT
         )
         """
     )
+    cur.execute("PRAGMA table_info(templates)")
+    cols = [r[1] for r in cur.fetchall()]
+    if "description" not in cols:
+        cur.execute("ALTER TABLE templates ADD COLUMN description TEXT")
     conn.commit()
     conn.close()
 
@@ -86,6 +98,8 @@ def settings_page():
         settings['player_view_health_bar'] = 'player_view_health_bar' in request.form
         settings['openai_api_key'] = request.form.get('openai_api_key', '').strip()
         openai.api_key = settings['openai_api_key']
+        with open('thekey.py', 'w') as f:
+            f.write(f"OPENAI_API_KEY = {settings['openai_api_key']!r}\n")
     return render_template('settings.html', settings=settings)
 
 
@@ -93,7 +107,7 @@ def settings_page():
 def add_group_page():
     conn = sqlite3.connect('saved_info.db')
     cur = conn.cursor()
-    cur.execute('SELECT id, name, ac, hp, count, damage_die, damage_bonus, attack_name, attack_bonus FROM templates')
+    cur.execute('SELECT id, name, ac, hp, count, damage_die, damage_bonus, attack_name, attack_bonus, description FROM templates')
     rows = cur.fetchall()
     conn.close()
     templates = [
@@ -107,6 +121,7 @@ def add_group_page():
             'damage_bonus': r[6],
             'attack_name': r[7],
             'attack_bonus': r[8],
+            'description': r[9],
         }
         for r in rows
     ]
@@ -143,8 +158,8 @@ def save_template():
     conn = sqlite3.connect('saved_info.db')
     cur = conn.cursor()
     cur.execute(
-        'INSERT INTO templates (name, ac, hp, count, damage_die, damage_bonus, attack_name, attack_bonus) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO templates (name, ac, hp, count, damage_die, damage_bonus, attack_name, attack_bonus, description) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (
             data.get('name'),
             int(data.get('ac', 10)),
@@ -154,6 +169,7 @@ def save_template():
             int(data.get('damage_bonus', 0)),
             data.get('attack_name', 'Attack'),
             int(data.get('attack_bonus', 0)),
+            data.get('description', ''),
         ),
     )
     conn.commit()
@@ -165,6 +181,16 @@ def delete_group(group_id):
     global npc_groups
     npc_groups = [g for g in npc_groups if g['id'] != group_id]
     return redirect(url_for('index'))
+
+
+@app.route('/delete_template/<int:template_id>', methods=['POST'])
+def delete_template(template_id):
+    conn = sqlite3.connect('saved_info.db')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM templates WHERE id=?', (template_id,))
+    conn.commit()
+    conn.close()
+    return ('', 204)
 
 @app.route('/upload_icon/<int:group_id>', methods=['POST'])
 def upload_icon(group_id):
