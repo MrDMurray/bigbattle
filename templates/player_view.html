@@ -18,7 +18,7 @@
       <div class="group" id="group-{{ g.id }}">
         <div class="grid">
       {% for npc in g.npcs %}
-      <div class="cell">
+      <div class="cell" data-max-hp="{{ npc.max_hp }}">
         <img src="{{ url_for('static', filename='icons/' + (g.icon if g.icon else 'default_icon.png')) }}"
              onerror="this.onerror=null;this.src='{{ url_for('static', filename='icons/default_icon.png') }}';" />
         {% if settings.player_view_health_bar %}
