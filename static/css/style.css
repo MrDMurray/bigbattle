@@ -1,6 +1,8 @@
 body { font-family: sans-serif; background: #2b2b2b; color: #f0f0f0; }
 .top-nav { display: flex; gap: 10px; margin-bottom: 10px; }
 .top-nav a { color: #f0f0f0; text-decoration: none; padding: 4px 8px; }
+.top-nav form { margin: 0; }
+.top-nav button { background: none; border: 1px solid #f0f0f0; color: #f0f0f0; padding: 4px 8px; }
 .container { max-width: 1200px; margin: auto; padding: 20px; }
 #groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
 .group { background: #3b3b3b; padding: 6px; border-radius: 8px; width: 200px; position: relative;
