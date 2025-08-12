@@ -64,6 +64,9 @@ document.querySelectorAll('.attack-form').forEach(form => {
         if (Array.isArray(data.logs)) {
           data.logs.forEach(l => addLog(l));
         }
+
+        // Separator between events
+        addLog('----------');
       });
   });
 });
@@ -137,6 +140,7 @@ document.querySelectorAll('#dice-buttons .dice-btn').forEach(btn => {
     const original = btn.textContent;
     btn.textContent = roll;
     addLog(`d${sides} roll: ${roll}`);
+    addLog('----------');
     setTimeout(() => {
       btn.textContent = original;
     }, 10000);
