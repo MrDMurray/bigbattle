@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import random
 import os
 import sqlite3
+import json
 from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 import openai
@@ -59,6 +60,14 @@ def init_db():
     cols = [r[1] for r in cur.fetchall()]
     if "description" not in cols:
         cur.execute("ALTER TABLE templates ADD COLUMN description TEXT")
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY,
+            data TEXT
+        )
+        """
+    )
     conn.commit()
     conn.close()
 
@@ -200,6 +209,85 @@ def upload_icon(group_id):
         for g in npc_groups:
             if g['id'] == group_id:
                 g['icon'] = filename
+    return redirect(url_for('index'))
+
+
+def _serialize_groups():
+    return [
+        {
+            'id': g['id'],
+            'name': g['name'],
+            'ac': g['ac'],
+            'description': g.get('description', ''),
+            'damage_die': g.get('damage_die', '1d6'),
+            'damage_bonus': g.get('damage_bonus', 0),
+            'attack_name': g.get('attack_name', 'Attack'),
+            'attack_bonus': g.get('attack_bonus', 0),
+            'attack_die': g.get('attack_die', '1d20'),
+            'icon': g.get('icon', ''),
+            'base_hp': g.get('base_hp', 1),
+            'npcs': [{'hp': n.hp, 'max_hp': n.max_hp} for n in g.get('npcs', [])],
+        }
+        for g in npc_groups
+    ]
+
+
+def _deserialize_groups(data):
+    return [
+        {
+            'id': g['id'],
+            'name': g['name'],
+            'ac': g.get('ac', 10),
+            'description': g.get('description', ''),
+            'damage_die': g.get('damage_die', '1d6'),
+            'damage_bonus': g.get('damage_bonus', 0),
+            'attack_name': g.get('attack_name', 'Attack'),
+            'attack_bonus': g.get('attack_bonus', 0),
+            'attack_die': g.get('attack_die', '1d20'),
+            'icon': g.get('icon', ''),
+            'base_hp': g.get('base_hp', 1),
+            'npcs': [NPC(n['hp'], n.get('max_hp', n['hp'])) for n in g.get('npcs', [])],
+        }
+        for g in data
+    ]
+
+
+@app.route('/save_session', methods=['POST'])
+def save_session():
+    conn = sqlite3.connect('saved_info.db')
+    cur = conn.cursor()
+    session_data = {
+        'npc_groups': _serialize_groups(),
+        'next_id': next_id,
+        'settings': settings,
+    }
+    cur.execute('REPLACE INTO sessions (id, data) VALUES (1, ?)', (json.dumps(session_data),))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
+
+
+@app.route('/load_session', methods=['POST'])
+def load_session():
+    global npc_groups, next_id
+    conn = sqlite3.connect('saved_info.db')
+    cur = conn.cursor()
+    cur.execute('SELECT data FROM sessions WHERE id=1')
+    row = cur.fetchone()
+    conn.close()
+    if row:
+        data = json.loads(row[0])
+        npc_groups = _deserialize_groups(data.get('npc_groups', []))
+        next_id = data.get('next_id', 1)
+        settings.update(data.get('settings', {}))
+    return redirect(url_for('index'))
+
+
+@app.route('/clear_session', methods=['POST'])
+def clear_session():
+    global npc_groups, next_id
+    npc_groups = []
+    next_id = 1
     return redirect(url_for('index'))
 
 @app.route("/damage/<int:group_id>", methods=["POST"])
