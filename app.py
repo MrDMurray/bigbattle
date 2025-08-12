@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from datetime import datetime
 import random
 import os
 import sqlite3
@@ -63,11 +64,21 @@ def init_db():
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS sessions (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            saved_at TEXT,
             data TEXT
         )
         """
     )
+    cur.execute("PRAGMA table_info(sessions)")
+    s_cols = [r[1] for r in cur.fetchall()]
+    if "name" not in s_cols:
+        cur.execute("ALTER TABLE sessions ADD COLUMN name TEXT")
+    if "saved_at" not in s_cols:
+        cur.execute("ALTER TABLE sessions ADD COLUMN saved_at TEXT")
+    if "data" not in s_cols:
+        cur.execute("ALTER TABLE sessions ADD COLUMN data TEXT")
     conn.commit()
     conn.close()
 
@@ -261,18 +272,36 @@ def save_session():
         'next_id': next_id,
         'settings': settings,
     }
-    cur.execute('REPLACE INTO sessions (id, data) VALUES (1, ?)', (json.dumps(session_data),))
+    name = request.form.get('session_name', '').strip() or 'Unnamed Session'
+    saved_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cur.execute(
+        'INSERT INTO sessions (name, saved_at, data) VALUES (?, ?, ?)',
+        (name, saved_at, json.dumps(session_data)),
+    )
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
 
 
-@app.route('/load_session', methods=['POST'])
-def load_session():
+@app.route('/load_session', methods=['GET'])
+def load_session_page():
+    conn = sqlite3.connect('saved_info.db')
+    cur = conn.cursor()
+    cur.execute('SELECT id, name, saved_at FROM sessions ORDER BY saved_at DESC')
+    rows = cur.fetchall()
+    conn.close()
+    sessions = [
+        {'id': r[0], 'name': r[1], 'saved_at': r[2]} for r in rows
+    ]
+    return render_template('load_session.html', sessions=sessions)
+
+
+@app.route('/load_session/<int:session_id>', methods=['POST'])
+def load_session(session_id):
     global npc_groups, next_id
     conn = sqlite3.connect('saved_info.db')
     cur = conn.cursor()
-    cur.execute('SELECT data FROM sessions WHERE id=1')
+    cur.execute('SELECT data FROM sessions WHERE id=?', (session_id,))
     row = cur.fetchone()
     conn.close()
     if row:
