@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load Session</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Load Session</h1>
+    <nav class="top-nav">
+      <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+    </nav>
+    <ul>
+      {% for s in sessions %}
+      <li>
+        {{ s.name }} ({{ s.saved_at }})
+        <form action="{{ url_for('load_session', session_id=s.id) }}" method="post" style="display:inline;">
+          <button type="submit">Load</button>
+        </form>
+      </li>
+      {% else %}
+      <li>No saved sessions</li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>

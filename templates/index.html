@@ -13,8 +13,11 @@
       <a id="add-group-btn" href="{{ url_for('add_group_page') }}">+ Add NPC Group</a>
       <a href="{{ url_for('player_view') }}" class="nav-link">Player View</a>
       <a href="{{ url_for('settings_page') }}" class="nav-link">Settings</a>
-      <form action="{{ url_for('save_session') }}" method="post"><button type="submit">Save Session</button></form>
-      <form action="{{ url_for('load_session') }}" method="post"><button type="submit">Load Session</button></form>
+      <form action="{{ url_for('save_session') }}" method="post">
+        <input type="text" name="session_name" placeholder="Session Name" required>
+        <button type="submit">Save Session</button>
+      </form>
+      <a href="{{ url_for('load_session_page') }}" class="nav-link">Load Session</a>
       <form action="{{ url_for('clear_session') }}" method="post"><button type="submit">Clear Session</button></form>
     </nav>
     <div id="groups">
