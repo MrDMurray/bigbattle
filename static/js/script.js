@@ -3,6 +3,19 @@ document.getElementById('add-group-btn').addEventListener('click', (e) => {
   window.location.href = '/add_group';
 });
 
+const saveBtn = document.getElementById('save-session-btn');
+if (saveBtn) {
+  saveBtn.addEventListener('click', () => {
+    const name = prompt('Enter session name:');
+    if (name !== null) {
+      const fd = new FormData();
+      fd.append('session_name', name);
+      fetch('/save_session', { method: 'POST', body: fd })
+        .then(() => window.location.reload());
+    }
+  });
+}
+
 function addLog(text) {
   const logBox = document.getElementById('log');
   if (!logBox) return;
