@@ -322,13 +322,30 @@ def clear_session():
 @app.route("/damage/<int:group_id>", methods=["POST"])
 def damage(group_id):
     dmg = int(request.form.get("damage", 0))
+    targets_raw = request.form.get("targets", "")
     group = next((g for g in npc_groups if g["id"] == group_id), None)
     if group and group.get("npcs"):
-        # Target the NPC with the lowest remaining HP
-        target = min(group["npcs"], key=lambda n: n.hp)
-        target.hp -= dmg
-        if target.hp <= 0:
-            group["npcs"].remove(target)
+        if targets_raw:
+            indices = sorted(
+                {
+                    int(i)
+                    for i in targets_raw.split(",")
+                    if i.strip().isdigit()
+                },
+                reverse=True,
+            )
+            for idx in indices:
+                if 0 <= idx < len(group["npcs"]):
+                    npc = group["npcs"][idx]
+                    npc.hp -= dmg
+                    if npc.hp <= 0:
+                        del group["npcs"][idx]
+        else:
+            # Target the NPC with the lowest remaining HP
+            target = min(group["npcs"], key=lambda n: n.hp)
+            target.hp -= dmg
+            if target.hp <= 0:
+                group["npcs"].remove(target)
     total_hp = sum(n.hp for n in group.get("npcs", [])) if group else 0
     count = len(group.get("npcs", [])) if group else 0
     npc_hps = [n.hp for n in group.get("npcs", [])] if group else []
