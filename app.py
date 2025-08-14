@@ -26,6 +26,14 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+# Allow cross-origin requests so background images can be fetched
+# from this server by clients hosted on a different domain.
+@app.after_request
+def add_cors_headers(response):
+    """Add the headers necessary to permit cross-origin requests."""
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
+
 # In-memory store for npc groups.  Each group contains a list of NPC
 # instances which track their own hit points.
 npc_groups = []  # list of dicts
