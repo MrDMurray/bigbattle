@@ -37,6 +37,16 @@ function addLog(text) {
   }
 }
 
+const clearLogBtn = document.getElementById('clear-log-btn');
+if (clearLogBtn) {
+  clearLogBtn.addEventListener('click', () => {
+    const logBox = document.getElementById('log');
+    if (logBox) {
+      logBox.innerHTML = '';
+    }
+  });
+}
+
 // Allow selecting NPC cells by clicking on them
 document.querySelectorAll('.group .grid .cell').forEach(cell => {
   cell.addEventListener('click', () => {

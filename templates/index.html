@@ -43,7 +43,7 @@
               <button type="submit">{{ g.attack_name or 'Attack' }}</button>
               <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span><br>
               <label class="adv-option"><input type="checkbox" name="advantage">Adv</label>
-              <label class="adv-option"><input type="checkbox" name="disadvantage">DisAdv</label>
+              <label class="adv-option"><input type="checkbox" name="disadvantage">Dis</label>
               <label class="adv-option"><input type="checkbox" name="reach">Reach</label>
               <label class="adv-option"><input type="checkbox" name="ai">AI</label>
             </form>
@@ -58,14 +58,17 @@
             </p>
           </div>
           <div class="attack-result" id="result-{{ g.id }}"></div>
-          <div class="saves-row">
-            <input type="number" class="save-dc" value="10" />
-            <button type="button" class="save-btn" data-ability="STR">STR</button>
-            <button type="button" class="save-btn" data-ability="DEX">DEX</button>
-            <button type="button" class="save-btn" data-ability="CON">CON</button>
-            <button type="button" class="save-btn" data-ability="INT">INT</button>
-            <button type="button" class="save-btn" data-ability="WIS">WIS</button>
-            <button type="button" class="save-btn" data-ability="CHA">CHA</button>
+          <div class="saves-section">
+            <h3>Saving Throws</h3>
+            <div class="saves-row">
+              <label>Save DC <input type="number" class="save-dc" value="10" /></label>
+              <button type="button" class="save-btn" data-ability="STR">STR</button>
+              <button type="button" class="save-btn" data-ability="DEX">DEX</button>
+              <button type="button" class="save-btn" data-ability="CON">CON</button>
+              <button type="button" class="save-btn" data-ability="INT">INT</button>
+              <button type="button" class="save-btn" data-ability="WIS">WIS</button>
+              <button type="button" class="save-btn" data-ability="CHA">CHA</button>
+            </div>
           </div>
           <div class="menu">
             <button class="menu-btn" type="button">&#8942;</button>
@@ -92,7 +95,10 @@
       <button class="dice-btn" data-die="4">d4</button>
       <button class="dice-btn" data-die="2">d2</button>
     </div>
-    <div id="log"></div>
+    <div id="log-column">
+      <div id="log"></div>
+      <button id="clear-log-btn" type="button">Clear Log</button>
+    </div>
   </div>
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
