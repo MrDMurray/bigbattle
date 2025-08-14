@@ -37,6 +37,13 @@ function addLog(text) {
   }
 }
 
+// Allow selecting NPC cells by clicking on them
+document.querySelectorAll('.group .grid .cell').forEach(cell => {
+  cell.addEventListener('click', () => {
+    cell.classList.toggle('selected');
+  });
+});
+
 // Delete handlers
 document.querySelectorAll('.delete-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -88,11 +95,18 @@ document.querySelectorAll('.attack-form').forEach(form => {
 document.querySelectorAll('.damage-form').forEach(form => {
   form.addEventListener('submit', e => {
     e.preventDefault();
+    const group = form.closest('.group');
     const fd = new FormData(form);
+    if (group) {
+      const selected = group.querySelectorAll('.grid .cell.selected');
+      if (selected.length) {
+        const indices = Array.from(selected).map(cell => cell.dataset.index);
+        fd.append('targets', indices.join(','));
+      }
+    }
     fetch(form.action, { method: 'POST', body: fd })
       .then(res => res.json())
       .then(data => {
-        const group = form.closest('.group');
         if (!group) return;
         // Update stats line
         const statsSpan = group.querySelector('.stats-row span');
@@ -117,6 +131,12 @@ document.querySelectorAll('.damage-form').forEach(form => {
         for (let i = data.npc_hps.length; i < cells.length; i++) {
           cells[i].remove();
         }
+        // Reindex cells and clear selection
+        const newCells = group.querySelectorAll('.grid .cell');
+        newCells.forEach((cell, idx) => {
+          cell.dataset.index = idx;
+          cell.classList.remove('selected');
+        });
       });
   });
 });
