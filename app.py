@@ -151,6 +151,14 @@ def add_group():
     data = request.form
     base_hp = int(data.get("hp", 1))
     count = int(data.get("count", 1))
+    abilities = {
+        "STR": int(data.get("str", 13)),
+        "DEX": int(data.get("dex", 13)),
+        "CON": int(data.get("con", 13)),
+        "INT": int(data.get("int", 13)),
+        "WIS": int(data.get("wis", 13)),
+        "CHA": int(data.get("cha", 13)),
+    }
     group = {
         "id": next_id,
         "name": data.get("name", "Darkrider"),
@@ -164,6 +172,7 @@ def add_group():
         "icon": data.get("name", "default_icon") + ".png",
         "base_hp": base_hp,
         "npcs": [NPC(base_hp, base_hp) for _ in range(count)],
+        "abilities": abilities,
     }
     npc_groups.append(group)
     next_id += 1
@@ -238,6 +247,14 @@ def _serialize_groups():
             'icon': g.get('icon', ''),
             'base_hp': g.get('base_hp', 1),
             'npcs': [{'hp': n.hp, 'max_hp': n.max_hp} for n in g.get('npcs', [])],
+            'abilities': g.get('abilities', {
+                'STR': 13,
+                'DEX': 13,
+                'CON': 13,
+                'INT': 13,
+                'WIS': 13,
+                'CHA': 13,
+            }),
         }
         for g in npc_groups
     ]
@@ -258,6 +275,14 @@ def _deserialize_groups(data):
             'icon': g.get('icon', ''),
             'base_hp': g.get('base_hp', 1),
             'npcs': [NPC(n['hp'], n.get('max_hp', n['hp'])) for n in g.get('npcs', [])],
+            'abilities': g.get('abilities', {
+                'STR': 13,
+                'DEX': 13,
+                'CON': 13,
+                'INT': 13,
+                'WIS': 13,
+                'CHA': 13,
+            }),
         }
         for g in data
     ]

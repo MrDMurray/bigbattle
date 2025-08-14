@@ -179,3 +179,40 @@ document.querySelectorAll('#dice-buttons .dice-btn').forEach(btn => {
     }, 10000);
   });
 });
+
+// Saving throws for NPC groups
+document.querySelectorAll('.save-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.closest('.group');
+    if (!group) return;
+    const ability = btn.dataset.ability;
+    const dcInput = group.querySelector('.save-dc');
+    const dc = parseInt(dcInput.value, 10) || 10;
+    const score = parseInt(group.dataset[ability.toLowerCase()], 10) || 13;
+    const modifier = Math.floor((score - 10) / 2);
+    const cells = group.querySelectorAll('.grid .cell');
+    let successes = 0;
+    cells.forEach(cell => {
+      const roll = Math.floor(Math.random() * 20) + 1;
+      const total = roll + modifier;
+      const success = total >= dc;
+      if (success) successes++;
+      let marker = cell.querySelector('.save-result');
+      if (!marker) {
+        marker = document.createElement('span');
+        marker.classList.add('save-result');
+        cell.appendChild(marker);
+      }
+      marker.textContent = success ? 'S' : 'F';
+      marker.style.color = success ? 'lime' : 'red';
+      if (cell._saveTimeout) clearTimeout(cell._saveTimeout);
+      cell._saveTimeout = setTimeout(() => {
+        marker.textContent = '';
+      }, 30000);
+    });
+    const nameEl = group.querySelector('h2');
+    const groupName = nameEl ? nameEl.textContent : 'Group';
+    addLog(`${groupName} ${ability} save vs DC ${dc}: ${successes}/${cells.length} succeed`);
+    addLog('----------');
+  });
+});

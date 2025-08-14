@@ -28,6 +28,9 @@ button:active { transform: scale(0.95); }
 .ac-btn { padding: 2px 6px; }
 .small-btn { font-size: 12px; padding: 2px 6px; }
 .file-input { font-size: 12px; }
+.saves-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.save-dc { width: 4ch; }
+.save-result { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; pointer-events: none; }
 /* three-dot menu */
 .menu { position: absolute; top: 4px; right: 4px; }
 .menu-btn { background: none; border: none; color: #fff; font-size: 16px; cursor: pointer; }
