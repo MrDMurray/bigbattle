@@ -29,6 +29,7 @@ button:active { transform: scale(0.95); }
 .small-btn { font-size: 12px; padding: 2px 6px; }
 .file-input { font-size: 12px; }
 .saves-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.saves-section h3 { margin: 4px 0 0 0; font-size: 14px; }
 .save-dc { width: 4ch; }
 .save-result { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; pointer-events: none; }
 /* three-dot menu */
@@ -46,6 +47,7 @@ button:active { transform: scale(0.95); }
   width: 260px;
   display: flex;
 }
+#log-column { flex: 1; display: flex; flex-direction: column; }
 #log {
   background: #1b1b1b;
   border: 1px solid #555;
@@ -54,6 +56,7 @@ button:active { transform: scale(0.95); }
   overflow-y: auto;
   flex: 1;
 }
+#clear-log-btn { margin-top: 4px; }
 .attack-die { margin-left: 4px; font-size: 12px; }
 .adv-option { font-size: 12px; margin-right: 4px; }
 #dice-buttons {
