@@ -19,7 +19,7 @@
     </nav>
     <div id="groups">
       {% for g in groups %}
-      <div class="group" id="group-{{ g.id }}">
+      <div class="group" id="group-{{ g.id }}" data-str="{{ g.abilities['STR'] }}" data-dex="{{ g.abilities['DEX'] }}" data-con="{{ g.abilities['CON'] }}" data-int="{{ g.abilities['INT'] }}" data-wis="{{ g.abilities['WIS'] }}" data-cha="{{ g.abilities['CHA'] }}">
         <div class="grid">
           {% for i in range(g.count) %}
           {% set npc = g.npcs[i] %}
@@ -58,6 +58,15 @@
             </p>
           </div>
           <div class="attack-result" id="result-{{ g.id }}"></div>
+          <div class="saves-row">
+            <input type="number" class="save-dc" value="10" />
+            <button type="button" class="save-btn" data-ability="STR">STR</button>
+            <button type="button" class="save-btn" data-ability="DEX">DEX</button>
+            <button type="button" class="save-btn" data-ability="CON">CON</button>
+            <button type="button" class="save-btn" data-ability="INT">INT</button>
+            <button type="button" class="save-btn" data-ability="WIS">WIS</button>
+            <button type="button" class="save-btn" data-ability="CHA">CHA</button>
+          </div>
           <div class="menu">
             <button class="menu-btn" type="button">&#8942;</button>
             <div class="menu-content">
