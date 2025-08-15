@@ -94,20 +94,12 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET'])
-def home():
-    return render_template('index.html')
-
-@app.route('/seating', methods=['GET'])
-def seating():
-    return render_template('seating.html')
-
-@app.route('/battle', methods=['GET'])
-def battle():
+def index():
     # Calculate total HP for each group before rendering
     for g in npc_groups:
         g["total_hp"] = sum(n.hp for n in g.get("npcs", []))
         g["count"] = len(g.get("npcs", []))
-    return render_template("battle.html", groups=npc_groups, settings=settings)
+    return render_template("index.html", groups=npc_groups, settings=settings)
 
 
 @app.route('/player_view', methods=['GET'])
@@ -184,7 +176,7 @@ def add_group():
     }
     npc_groups.append(group)
     next_id += 1
-    return redirect(url_for('battle'))
+    return redirect(url_for('index'))
 
 
 @app.route('/save_template', methods=['POST'])
@@ -215,7 +207,7 @@ def save_template():
 def delete_group(group_id):
     global npc_groups
     npc_groups = [g for g in npc_groups if g['id'] != group_id]
-    return redirect(url_for('battle'))
+    return redirect(url_for('index'))
 
 
 @app.route('/delete_template/<int:template_id>', methods=['POST'])
@@ -237,7 +229,7 @@ def upload_icon(group_id):
         for g in npc_groups:
             if g['id'] == group_id:
                 g['icon'] = filename
-    return redirect(url_for('battle'))
+    return redirect(url_for('index'))
 
 
 def _serialize_groups():
@@ -313,7 +305,7 @@ def save_session():
     )
     conn.commit()
     conn.close()
-    return redirect(url_for('battle'))
+    return redirect(url_for('index'))
 
 
 @app.route('/load_session', methods=['GET'])
@@ -342,7 +334,7 @@ def load_session(session_id):
         npc_groups = _deserialize_groups(data.get('npc_groups', []))
         next_id = data.get('next_id', 1)
         settings.update(data.get('settings', {}))
-    return redirect(url_for('battle'))
+    return redirect(url_for('index'))
 
 
 @app.route('/clear_session', methods=['POST'])
@@ -350,7 +342,7 @@ def clear_session():
     global npc_groups, next_id
     npc_groups = []
     next_id = 1
-    return redirect(url_for('battle'))
+    return redirect(url_for('index'))
 
 @app.route("/damage/<int:group_id>", methods=["POST"])
 def damage(group_id):
