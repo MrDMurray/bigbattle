@@ -3,103 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mass Battle Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>Fair Question</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h1>Mass Battle Dashboard</h1>
-    <nav class="top-nav">
-      <a id="add-group-btn" href="{{ url_for('add_group_page') }}">+ Add NPC Group</a>
-      <a href="{{ url_for('player_view') }}" class="nav-link">Player View</a>
-      <a href="{{ url_for('settings_page') }}" class="nav-link">Settings</a>
-      <button id="save-session-btn" type="button">Save Session</button>
-      <a href="{{ url_for('load_session_page') }}" class="nav-link">Load Session</a>
-      <form action="{{ url_for('clear_session') }}" method="post"><button type="submit">Clear Session</button></form>
+  <header class="hero">
+    <h1>Fair Question</h1>
+    <p class="tagline">A Google Classroom Seating Plan/Quiz App that is NOT BORING!</p>
+    <button id="login-btn" class="google-btn">Log in with Google</button>
+  </header>
+  <main>
+    <section class="features">
+      <h2>What does it do?</h2>
+      <ul>
+        <li>Loads your students from Google Classroom into a seating plan</li>
+        <li>A "Random Student" button for quiz questions</li>
+        <li>Dramatic music, sound effects</li>
+        <li>Reads out students names in a dramatic British AI voice</li>
+        <li>Hand picked organic reaction gifs to entertain!</li>
+        <li>Keeps track of points!</li>
+        <li>Custom Backgrounds!</li>
+      </ul>
+      <p class="settings-note">You can enable or disable these features in settings (as well as make audio clips for student names).</p>
+    </section>
+    <nav class="apps">
+      <a id="seating-link" href="{{ url_for('seating') }}" class="app-card">
+        <span class="emoji">🪑</span>
+        <span class="title">Seating Planet</span>
+      </a>
     </nav>
-    <div id="groups">
-      {% for g in groups %}
-      <div class="group" id="group-{{ g.id }}" data-str="{{ g.abilities['STR'] }}" data-dex="{{ g.abilities['DEX'] }}" data-con="{{ g.abilities['CON'] }}" data-int="{{ g.abilities['INT'] }}" data-wis="{{ g.abilities['WIS'] }}" data-cha="{{ g.abilities['CHA'] }}">
-        <div class="grid">
-          {% for i in range(g.count) %}
-          {% set npc = g.npcs[i] %}
-          <div class="cell" data-max-hp="{{ npc.max_hp }}" data-index="{{ i }}">
-            <span class="hp-label">{{ npc.hp }}</span>
-            <img src="{{ url_for('static', filename='icons/' + (g.icon if g.icon else 'default_icon.png')) }}"
-                 onerror="this.onerror=null;this.src='{{ url_for('static', filename='icons/default_icon.png') }}';" />
-            {% if settings.dm_view_health_bar %}
-            {% set pct = (npc.hp / npc.max_hp * 100) if npc.max_hp else 100 %}
-            <div class="hp-bar {{ 'green' if pct>=76 else 'yellow' if pct>=50 else 'orange' if pct>=25 else 'red' }}"></div>
-            {% endif %}
-          </div>
-          {% endfor %}
-        </div>
-        <div class="info">
-          <h2>{{ g.name }}</h2>
-          <div class="stats-row">
-            <span>Total Group HP: {{ g.total_hp }} Enemies Remaining: {{ g.count }}</span>
-            
-			<form class="attack-form" data-group-name="{{ g.name }}" data-attack-name="{{ g.attack_name }}" action="{{ url_for('attack', group_id=g.id) }}" method="post">
-              <button type="submit">{{ g.attack_name or 'Attack' }}</button>
-              <span class="attack-die">(1d20{% if g.attack_bonus %}+{{ g.attack_bonus }}{% endif %})</span><br>
-              <label class="adv-option"><input type="checkbox" name="advantage">Adv</label>
-              <label class="adv-option"><input type="checkbox" name="disadvantage">Dis</label>
-              <label class="adv-option"><input type="checkbox" name="reach">Reach</label>
-              <label class="adv-option"><input type="checkbox" name="ai">AI</label>
-            </form>
-            <form class="damage-form" action="{{ url_for('damage', group_id=g.id) }}" method="post">
-              <input type="number" name="damage" value="1" min="0" />
-              <button type="submit">Reduce Mob HP</button>
-            </form>
-            <p class="player-ac">Player AC:
-              <button type="button" class="ac-btn ac-dec" data-id="{{ g.id }}">-</button>
-              <span class="ac-value">{{ g.ac }}</span>
-              <button type="button" class="ac-btn ac-inc" data-id="{{ g.id }}">+</button>
-            </p>
-          </div>
-          <div class="attack-result" id="result-{{ g.id }}"></div>
-          <div class="saves-section">
-            <h3>Saving Throws</h3>
-            <div class="saves-row">
-              <label>Save DC <input type="number" class="save-dc" value="10" /></label>
-              <button type="button" class="save-btn" data-ability="STR">STR</button>
-              <button type="button" class="save-btn" data-ability="DEX">DEX</button>
-              <button type="button" class="save-btn" data-ability="CON">CON</button>
-              <button type="button" class="save-btn" data-ability="INT">INT</button>
-              <button type="button" class="save-btn" data-ability="WIS">WIS</button>
-              <button type="button" class="save-btn" data-ability="CHA">CHA</button>
-            </div>
-          </div>
-          <div class="menu">
-            <button class="menu-btn" type="button">&#8942;</button>
-            <div class="menu-content">
-              <button class="delete-btn small-btn" data-id="{{ g.id }}">Delete Group</button>
-              <form class="upload-form" action="{{ url_for('upload_icon', group_id=g.id) }}" method="post" enctype="multipart/form-data">
-                <input type="file" name="icon" accept="image/*" class="file-input" />
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-  <div id="log-container">
-    <div id="dice-buttons">
-      <button class="dice-btn" data-die="20">d20</button>
-      <button class="dice-btn" data-die="100">d100</button>
-      <button class="dice-btn" data-die="12">d12</button>
-      <button class="dice-btn" data-die="10">d10</button>
-      <button class="dice-btn" data-die="8">d8</button>
-      <button class="dice-btn" data-die="6">d6</button>
-      <button class="dice-btn" data-die="4">d4</button>
-      <button class="dice-btn" data-die="2">d2</button>
-    </div>
-    <div id="log-column">
-      <div id="log"></div>
-      <button id="clear-log-btn" type="button">Clear Log</button>
-    </div>
-  </div>
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </main>
+  <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
 </body>
 </html>
